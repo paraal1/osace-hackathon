@@ -1,4 +1,4 @@
-﻿# 🤖 AI Vision System - Robot vs Human Classifier
+<img width="1907" height="875" alt="Screenshot 2025-11-08 201213" src="https://github.com/user-attachments/assets/58f8405b-361d-4e3a-9bcb-9eadacac36d1" />﻿# 🤖 AI Vision System - Robot vs Human Classifier
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/)
@@ -11,21 +11,23 @@
 
 ## 📸 Screenshots
 
-### 🏠 Homepage & Upload Interface
-![Homepage](imagesreadme/Screenshot%202025-11-08%20201213.png)
-*Cyberpunk-themed UI with single/batch upload modes and live camera integration*
+<img width="1907" height="875" alt="Screenshot 2025-11-08 201213" src="https://github.com/user-attachments/assets/d6ef749f-0c1a-4adf-b68c-8ce69e765f09" />
+
 
 ### 🎯 Single Image Prediction & Results
 ![Prediction Results](imagesreadme/Screenshot%202025-11-08%20201304.png)
 *Detailed confidence scores and probability breakdown for each class*
+<img width="1242" height="870" alt="Screenshot 2025-11-08 201304" src="https://github.com/user-attachments/assets/5cc70fbb-9ce5-4084-b8aa-6bab831338e1" />
 
 ### 📊 Batch Processing Results
 ![Batch Results](imagesreadme/Screenshot%202025-11-08%20201342.png)
 *Interactive grid view with per-image predictions and summary statistics*
+<img width="1718" height="855" alt="Screenshot 2025-11-08 201342" src="https://github.com/user-attachments/assets/69b6ffb0-20ba-4cfc-95dc-40025087bc42" />
 
 ### 📈 Statistics & History Dashboard
 ![Statistics](imagesreadme/Screenshot%202025-11-08%20201430.png)
 *Track total predictions, average confidence, and recent classification history*
+<img width="815" height="834" alt="Screenshot 2025-11-08 201430" src="https://github.com/user-attachments/assets/315ed1ef-0a11-48b4-b52e-0296df908569" />
 
 ---
 
