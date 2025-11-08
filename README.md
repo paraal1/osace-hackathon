@@ -12,31 +12,20 @@
 ## 📸 Screenshots
 
 ### 🏠 Homepage & Upload Interface
-![Homepage](imagesreadme/homepage.png)
+![Homepage](imagesreadme/Screenshot%202025-11-08%20201213.png)
 *Cyberpunk-themed UI with single/batch upload modes and live camera integration*
 
-### 📷 Live Camera Mode with Face Detection
-![Camera Mode](imagesreadme/camera_mode.png)
-*Real-time face distance guidance with color-coded feedback (green = optimal, yellow = adjust, red = too far/close)*
-
-### 🎯 Single Image Prediction
-![Prediction Results](imagesreadme/prediction_results.png)
+### 🎯 Single Image Prediction & Results
+![Prediction Results](imagesreadme/Screenshot%202025-11-08%20201304.png)
 *Detailed confidence scores and probability breakdown for each class*
 
-### 📊 Batch Processing
-![Batch Upload](imagesreadme/batch_upload.png)
-*Upload up to 20 images simultaneously with progress tracking*
-
-![Batch Results](imagesreadme/batch_results.png)
+### 📊 Batch Processing Results
+![Batch Results](imagesreadme/Screenshot%202025-11-08%20201342.png)
 *Interactive grid view with per-image predictions and summary statistics*
 
 ### 📈 Statistics & History Dashboard
-![Statistics](imagesreadme/statistics.png)
+![Statistics](imagesreadme/Screenshot%202025-11-08%20201430.png)
 *Track total predictions, average confidence, and recent classification history*
-
-### 💾 CSV Export
-![CSV Export](imagesreadme/csv_export.png)
-*Download batch results with detailed metrics for reporting*
 
 ---
 
@@ -57,22 +46,9 @@
 
 ### 1. Clone the repository
 
-```bash
-git clone https://github.com/paraal1/osace-hackathon.git
-cd osace-hackathon
-```
-
 ### 2. Install dependencies
 
-```bash
-pip install -r requirements.txt
-```
-
 ### 3. Run the Flask app
-
-```bash
-python api/app.py
-```
 
 ### 4. Access the app
 
@@ -82,7 +58,7 @@ Open your browser and go to `http://localhost:5000`
 
 ## 📚 Documentation
 
-See the [README.md](README.md) file for detailed documentation on:
+See the [QUICKSTART.md](QUICKSTART.md) file for detailed documentation on:
 - Project architecture
 - Installation and configuration
 - How to use the app
