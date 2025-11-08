@@ -1184,8 +1184,9 @@
                     const centerX = rect.width / 2;
                     const centerY = rect.height / 2;
 
-                    const rotateX = (y - centerY) / 99;
-                    const rotateY = (centerX - x) / 99;
+                    // Increased divisor from 99 to 250 for much less tilt
+                    const rotateX = (y - centerY) / 250;
+                    const rotateY = (centerX - x) / 250;
 
                     card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                 });
