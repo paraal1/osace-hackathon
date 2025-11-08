@@ -8,11 +8,11 @@ Batch Size: 32
 Image Size: (224, 224)
 Learning Rate: 0.0001
 
-Training Samples: 147
-Validation Samples: 31
+Training Samples: 1490
+Validation Samples: 319
 
-Final Validation Loss: 0.1935
-Final Validation Accuracy: 0.9032 (90.32%)
-Final Validation Precision: 0.9032
-Final Validation Recall: 0.9032
-Final Validation F1-Score: 0.9032
+Final Validation Loss: 0.1489
+Final Validation Accuracy: 0.9216 (92.16%)
+Final Validation Precision: 0.9216
+Final Validation Recall: 0.9216
+Final Validation F1-Score: 0.9216

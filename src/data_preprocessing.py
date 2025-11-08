@@ -1,4 +1,4 @@
-"""
+﻿"""
 Data preprocessing and augmentation for the image classifier.
 Handles loading, splitting, and preparing the dataset.
 """
@@ -7,14 +7,21 @@ import shutil
 import numpy as np
 import cv2
 import rawpy
-from PIL import Image
+from PIL import Image, ImageFile
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+# Allow PIL to load truncated images
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 # Robust import of config whether run as module or script
 try:
-    from src import config # when imported from project root
+    from src import config  # when imported from project root
 except ImportError:
-    from . import config # fallback using relative import
+    try:
+        from . import config  # fallback using relative import
+    except ImportError:
+        import config  # last resort for direct execution
 
 
 def load_and_convert_image(image_path, target_size=(224, 224)):

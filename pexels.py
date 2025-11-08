@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 pexels_downloader.py
-Single-file PyQt5 app to search + download images from the Pexels API.
+Single-file PyQt5 app to search + download images from the Pexels API with multi-threading.
 
 Requirements:
     pip install PyQt5 requests
@@ -10,28 +10,60 @@ Before running, set your PEXELS_API_KEY environment variable:
     export PEXELS_API_KEY="your_key_here"   # Linux / macOS
     setx PEXELS_API_KEY "your_key_here"     # Windows (then restart terminal)
 
-Author: ChatGPT (single-file version)
+Author: ChatGPT (single-file version with multi-threading)
 """
 
 import os
 import sys
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 PEXELS_SEARCH_URL = "https://api.pexels.com/v1/search"
 MAX_PER_PAGE = 80
+MAX_WORKERS = 10  # Number of concurrent download threads
+
 
 class DownloaderThread(QtCore.QThread):
     progress_changed = QtCore.pyqtSignal(int)
     status_changed = QtCore.pyqtSignal(str)
     finished_signal = QtCore.pyqtSignal(bool, str)
 
-    def __init__(self, api_key, query, count, folder, parent=None):
+    def __init__(self, api_key, query, count, folder, max_workers=MAX_WORKERS, parent=None):
         super().__init__(parent)
         self.api_key = "weNk0JBE1bENuYpmGQDhuvljDUZeqxdwyqGx5rGBIWnJZ2d2SSy7hcRL"
         self.query = query.strip()
         self.count = int(count)
         self.folder = folder
+        self.max_workers = max_workers
+        self.downloaded_count = 0
+        self.lock = Lock()
+
+    def download_single_image(self, img_data):
+        """Download a single image - designed to run in thread pool"""
+        img_url, out_path, index, total = img_data
+        try:
+            dl = requests.get(img_url, stream=True, timeout=30)
+            if dl.status_code == 200:
+                with open(out_path, "wb") as f:
+                    for chunk in dl.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+
+                with self.lock:
+                    self.downloaded_count += 1
+                    percent = int((self.downloaded_count / total) * 100)
+                    self.progress_changed.emit(percent)
+                    self.status_changed.emit(
+                        f"Downloaded {self.downloaded_count}/{total}: {os.path.basename(out_path)}"
+                    )
+
+                return True, out_path
+            else:
+                return False, f"HTTP {dl.status_code} for {img_url}"
+        except Exception as ex:
+            return False, f"Error downloading {img_url}: {ex}"
 
     def run(self):
         if not self.api_key:
@@ -48,27 +80,32 @@ class DownloaderThread(QtCore.QThread):
             return
 
         headers = {"Authorization": self.api_key}
-        downloaded = 0
         page = 1
         total_to_get = self.count
         self.status_changed.emit(f"Searching for \"{self.query}\"...")
 
+        # Collect all image URLs first
+        images_to_download = []
+
         try:
-            while downloaded < total_to_get:
-                per_page = min(MAX_PER_PAGE, total_to_get - downloaded)
+            while len(images_to_download) < total_to_get:
+                per_page = min(MAX_PER_PAGE, total_to_get - len(images_to_download))
                 params = {"query": self.query, "per_page": per_page, "page": page}
                 resp = requests.get(PEXELS_SEARCH_URL, headers=headers, params=params, timeout=20)
+
                 if resp.status_code == 401:
                     self.finished_signal.emit(False, "Unauthorized: check your API key.")
                     return
+
                 if resp.status_code != 200:
                     self.finished_signal.emit(False, f"Pexels API error: {resp.status_code} {resp.text}")
                     return
 
                 data = resp.json()
                 photos = data.get("photos", [])
+
                 if not photos:
-                    if downloaded == 0:
+                    if len(images_to_download) == 0:
                         self.finished_signal.emit(False, "No photos found for that query.")
                         return
                     else:
@@ -76,7 +113,7 @@ class DownloaderThread(QtCore.QThread):
                         break
 
                 for p in photos:
-                    if downloaded >= total_to_get:
+                    if len(images_to_download) >= total_to_get:
                         break
 
                     src = p.get("src", {})
@@ -87,34 +124,46 @@ class DownloaderThread(QtCore.QThread):
                     photo_id = p.get("id", "img")
                     ext = os.path.splitext(img_url.split("?")[0])[1] or ".jpg"
                     safe_query = "".join(ch if ch.isalnum() else "_" for ch in self.query)[:40]
-                    fname = f"{safe_query}_{downloaded+1:04d}_{photo_id}{ext}"
+                    fname = f"{safe_query}_{len(images_to_download)+1:04d}_{photo_id}{ext}"
                     out_path = os.path.join(self.folder, fname)
 
-                    self.status_changed.emit(f"Downloading {downloaded+1}/{total_to_get} ...")
-                    try:
-                        dl = requests.get(img_url, stream=True, timeout=30)
-                        if dl.status_code == 200:
-                            with open(out_path, "wb") as f:
-                                for chunk in dl.iter_content(chunk_size=8192):
-                                    if chunk:
-                                        f.write(chunk)
-                        else:
-                            self.status_changed.emit(f"Warning: failed to download image {photo_id}.")
-                            continue
-                    except Exception as ex:
-                        self.status_changed.emit(f"Warning: error downloading {img_url}: {ex}")
-                        continue
-
-                    downloaded += 1
-                    percent = int((downloaded / total_to_get) * 100)
-                    self.progress_changed.emit(percent)
+                    images_to_download.append((img_url, out_path, len(images_to_download) + 1, total_to_get))
 
                 page += 1
 
-            if downloaded == 0:
-                self.finished_signal.emit(False, "No images were downloaded.")
+            if not images_to_download:
+                self.finished_signal.emit(False, "No images found to download.")
+                return
+
+            # Download all images concurrently using ThreadPoolExecutor
+            self.status_changed.emit(
+                f"Starting concurrent download of {len(images_to_download)} images with {self.max_workers} threads..."
+            )
+
+            successful = 0
+            failed = 0
+
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                future_to_img = {
+                    executor.submit(self.download_single_image, img_data): img_data for img_data in images_to_download
+                }
+
+                for future in as_completed(future_to_img):
+                    success, msg = future.result()
+                    if success:
+                        successful += 1
+                    else:
+                        failed += 1
+                        self.status_changed.emit(f"Warning: {msg}")
+
+            if successful == 0:
+                self.finished_signal.emit(False, "No images were downloaded successfully.")
             else:
-                self.finished_signal.emit(True, f"Downloaded {downloaded} image(s) to: {self.folder}")
+                summary = f"Downloaded {successful} image(s) to: {self.folder}"
+                if failed > 0:
+                    summary += f" ({failed} failed)"
+                self.finished_signal.emit(True, summary)
+
         except Exception as e:
             self.finished_signal.emit(False, f"Unexpected error: {e}")
 
@@ -122,8 +171,8 @@ class DownloaderThread(QtCore.QThread):
 class PexelsDownloaderApp(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Pexels API Downloader")
-        self.setMinimumSize(520, 260)
+        self.setWindowTitle("Pexels API Downloader (Multi-threaded)")
+        self.setMinimumSize(520, 320)
         self._build_ui()
         self.downloader_thread = None
 
@@ -155,6 +204,17 @@ class PexelsDownloaderApp(QtWidgets.QWidget):
         row_controls.addWidget(self.btn_browse)
         layout.addLayout(row_controls)
 
+        # Add thread count control
+        row_threads = QtWidgets.QHBoxLayout()
+        row_threads.addWidget(QtWidgets.QLabel("Concurrent threads:"))
+        self.spin_threads = QtWidgets.QSpinBox()
+        self.spin_threads.setRange(1, 20)
+        self.spin_threads.setValue(MAX_WORKERS)
+        self.spin_threads.setToolTip("Number of simultaneous downloads (higher = faster, but may overload)")
+        row_threads.addWidget(self.spin_threads)
+        row_threads.addStretch()
+        layout.addLayout(row_threads)
+
         row_action = QtWidgets.QHBoxLayout()
         self.btn_download = QtWidgets.QPushButton("Download")
         self.btn_download.clicked.connect(self.on_download)
@@ -172,7 +232,7 @@ class PexelsDownloaderApp(QtWidgets.QWidget):
         self.status_text.setMaximumHeight(110)
         layout.addWidget(self.status_text)
 
-        note = QtWidgets.QLabel("Make sure PEXELS_API_KEY is set in your environment.")
+        note = QtWidgets.QLabel("Make sure PEXELS_API_KEY is set in your environment. Multi-threaded for faster downloads!")
         note.setStyleSheet("color: gray; font-size: 11px;")
         layout.addWidget(note)
 
@@ -194,6 +254,7 @@ class PexelsDownloaderApp(QtWidgets.QWidget):
         query = self.query_edit.text()
         count = self.spin_count.value()
         folder = self.folder_edit.text().strip() or os.path.expanduser("~")
+        max_workers = self.spin_threads.value()
 
         if not os.path.isdir(folder):
             try:
@@ -204,9 +265,9 @@ class PexelsDownloaderApp(QtWidgets.QWidget):
 
         self.progress.setValue(0)
         self.status_text.clear()
-        self.append_status("Starting...")
+        self.append_status(f"Starting with {max_workers} concurrent threads...")
 
-        self.downloader_thread = DownloaderThread(api_key, query, count, folder)
+        self.downloader_thread = DownloaderThread(api_key, query, count, folder, max_workers)
         self.downloader_thread.progress_changed.connect(self.progress.setValue)
         self.downloader_thread.status_changed.connect(self.append_status)
         self.downloader_thread.finished_signal.connect(self.on_finished)
