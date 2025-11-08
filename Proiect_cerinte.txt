@@ -1,0 +1,52 @@
+﻿Image Classifier Sprint 
+
+ 
+
+ 
+
+Scop 
+
+Echipa trebuie să construiască un prototip funcțional de clasificare a imaginilor, folosind un model CNN, pe baza unui dataset public disponibil. Echipa va realiza întregul flux: de la pregătirea datelor, antrenarea/integratea modelului, până la un mic API sau o interfață de testare. 
+
+Cerințe 
+
+Dataset: Alegeți un set de imagini public: roboti vs oameni. 
+
+Model: Folosiți o arhitectură CNN (ex: Keras, PyTorch) — se poate porni de la un model preantrenat sau construi unul de la zero. Se va urmări obținerea unei acurateți rezonabile (> 90%), dacă resursele permit. 
+
+Preprocesare: Includeți pași de pregătire a imaginilor: redimensionare, normalizare, augmentare (opțional). 
+
+Antrenare & evaluare: 
+Împărțiți datele în train/val/test. 
+Raportați cel puțin: acuratețe și pierdere (loss) pentru antrenare și validare. 
+Includeți cel puțin câteva epoci de antrenare (ex: 5–10 epoci) și un grafic de evoluție (opțional). 
+
+Export model: Salvați modelul antrenat într-un fișier (.h5, .pt) pentru utilizare ulterioară. 
+
+Integrare minimală: 
+Construiți un mic API (de ex. cu Flask) sau o aplicație de tip CLI/GUI, în care utilizatorul poate încărca o imagine și primește ca răspuns clasa prezisă (și probabilitatea). 
+Asigurați persistența rezultatelor: la fiecare predicție să se salveze într-o bază simplă (ex: SQLite) cu coloanele: filename, predicted_class, confidence, timestamp. 
+
+Documentație & demonstrație: 
+Prezentați un fișier README care explică cum se rulează proiectul, ce arhitectură s-a folosit, ce rezultate s-au obținut și ce provocări ați întâmpinat. 
+Pregătiți câteva imagini de test (minimum trei) pentru demo-ul final și arătați cum aplicația le clasifică. 
+
+Livrabile la finalul zilei 
+
+-Cod sursă (GitHub/GitLab) organizat; 
+
+-Model salvat; 
+
+-Documentație README; 
+
+-Scurt demo live/înregistrat (opțional), unde se arată uploadul imaginii și predicția. 
+
+Roluri recomandate în echipă (3 membri) 
+
+-Membru 1 – Preprocesare & Dataset: Se ocupă de descărcarea datasetului, împărțirea în train/val/test, aplicarea augmentărilor și pregătirea pentru antrenare. 
+
+-Membru 2 – Model & Antrenare: Construiește arhitectura CNN, antrenează modelul, evaluează performanța și salvează modelul. 
+
+-Membru 3 – Integrare & Interfață: Creează API-ul/interfața pentru utilizator, integrează modelul salvat, salvează predicțiile în baza de date și realizează demo-ul. 
+
+ 
