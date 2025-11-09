@@ -1,5 +1,3 @@
-<img width="1907" height="875" alt="Screenshot 2025-11-08 201213" src="https://github.com/user-attachments/assets/58f8405b-361d-4e3a-9bcb-9eadacac36d1" />﻿# 🤖 AI Vision System - Robot vs Human Classifier
-
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0-green.svg)](https://flask.palletsprojects.com/)
